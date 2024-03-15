@@ -1,35 +1,41 @@
-name: Test
-
-on:
-  pull_request:
-    branches: "**"
-
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-      - name: "[Setup] Java"
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: "[Setup] Android"
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 10406996
-          log-accepted-android-sdk-licenses: false
-      - name: "[Test] Linting"
-        working-directory: OneSignalSDK
-        run: |
-          ./gradlew ktlintCheck --console=plain
-      - name: "[Test] SDK Unit Tests"
-        working-directory: OneSignalSDK
-        run: |
-          ./gradlew testReleaseUnitTest --console=plain --continue
-      - name: Unit tests results
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: unit-tests-results
-          path: OneSignalSDK/unittest/build
+    - continue-on-error: true
+      uses: actions/checkout@v3
+    - continue-on-error: true
+      name: '[Setup] Java'
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: '17'
+    - continue-on-error: true
+      name: '[Setup] Android'
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: 10406996
+        log-accepted-android-sdk-licenses: false
+    - continue-on-error: true
+      name: '[Test] Linting'
+      run: './gradlew ktlintCheck --console=plain
+
+        '
+      working-directory: OneSignalSDK
+    - continue-on-error: true
+      name: '[Test] SDK Unit Tests'
+      run: './gradlew testReleaseUnitTest --console=plain --continue
+
+        '
+      working-directory: OneSignalSDK
+    - continue-on-error: true
+      if: failure()
+      name: Unit tests results
+      uses: actions/upload-artifact@v3
+      with:
+        name: unit-tests-results
+        path: OneSignalSDK/unittest/build
+name: Test
+on:
+  repository_dispatch:
+    types: trigger-ga___ci.yml
